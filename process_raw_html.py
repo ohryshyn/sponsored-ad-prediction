@@ -18,10 +18,13 @@ def get_title(soup):
 
 def get_language(soup):
     # get language of the html file
-    lang = soup.find('html').get('lang')
-    if lang:
-        return lang
-    else:
+    try:
+        lang = soup.find('html').get('lang')
+        if lang:
+            return lang
+        else:
+            return None
+    except:
         return None
 
 
@@ -200,14 +203,13 @@ def get_html_features_df(html_files_dir):
     # get html features and file names for all txt files in a given directory
     html_files = glob.glob(html_files_dir + '/*.txt')
     html_features_list = []
+    i = 1
     for html_file in html_files:
+        print(f"Processing file {i} of {len(html_files)}")
         html_features = get_html_features(html_file)
         html_features_list.append(html_features)
+        i += 1
     df = pd.DataFrame(html_features_list)
+    df['detected_language'] = df['raw_text'].apply(
+        lambda x: detect(x) if x else None)
     return df
-
-
-df = get_html_features_df(RAW_HTML_FOLDER_PATH)
-df['detected_language'] = df['raw_text'].apply(
-    lambda x: detect(x) if x else None)
-print(df.head())
