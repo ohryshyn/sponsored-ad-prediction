@@ -1,7 +1,9 @@
 import bs4 as bs
-import pandas as pd
+import zipfile
+from multiprocessing import Pool
 import glob
-from langdetect import detect
+import pandas as pd
+
 
 RAW_HTML_FOLDER_PATH = 'data/raw_html_files/'
 
@@ -162,54 +164,60 @@ def get_num_of_digits(soup):
     return len([c for c in soup.text if c.isdigit()])
 
 
-def get_html_features(html_file_path):
+def get_html_features(html):
     # apply all parsing functions above to a given html file and returns a dictionary of features
-    with open(html_file_path, 'r') as f:
-        html = f.read()
-        soup = bs.BeautifulSoup(html, 'html.parser')
-        # create a dictionary of features
-        html_features = {
-            'filename': html_file_path.split('/')[-1],
-            'title': get_title(soup),
-            'language': get_language(soup),
-            'raw_text': get_raw_text(soup),
-            'num_headers': get_num_headers(soup),
-            'num_paragraphs': get_num_paragraphs(soup),
-            'num_tags': get_num_tags(soup),
-            'num_links': get_num_links(soup),
-            'num_images': get_num_images(soup),
-            'num_tables': get_num_tables(soup),
-            'num_lists': get_num_lists(soup),
-            'num_forms': get_num_forms(soup),
-            'num_inputs': get_num_inputs(soup),
-            'num_buttons': get_num_buttons(soup),
-            'num_scripts': get_num_scripts(soup),
-            'num_styles': get_num_styles(soup),
-            'num_iframes': get_num_iframes(soup),
-            'num_embeds': get_num_embeds(soup),
-            'num_lines': get_num_of_lines(soup),
-            'num_words': get_num_of_words(soup),
-            'num_italic_words': get_num_italic_words(soup),
-            'num_bold_words': get_num_bold_words(soup),
-            'num_characters': get_num_of_characters(soup),
-            'num_unique_words': get_num_of_unique_words(soup),
-            'num_unique_characters': get_num_of_unique_characters(soup),
-            'num_digits': get_num_of_digits(soup)
-        }
-        return html_features
+    soup = bs.BeautifulSoup(html, 'html.parser')
+    # create a dictionary of features
+    html_features = {
+        'filename': '',
+        'title': get_title(soup),
+        'language': get_language(soup),
+        'raw_text': get_raw_text(soup),
+        'num_headers': get_num_headers(soup),
+        'num_paragraphs': get_num_paragraphs(soup),
+        'num_tags': get_num_tags(soup),
+        'num_links': get_num_links(soup),
+        'num_images': get_num_images(soup),
+        'num_tables': get_num_tables(soup),
+        'num_lists': get_num_lists(soup),
+        'num_forms': get_num_forms(soup),
+        'num_inputs': get_num_inputs(soup),
+        'num_buttons': get_num_buttons(soup),
+        'num_scripts': get_num_scripts(soup),
+        'num_styles': get_num_styles(soup),
+        'num_iframes': get_num_iframes(soup),
+        'num_embeds': get_num_embeds(soup),
+        'num_lines': get_num_of_lines(soup),
+        'num_words': get_num_of_words(soup),
+        'num_italic_words': get_num_italic_words(soup),
+        'num_bold_words': get_num_bold_words(soup),
+        'num_characters': get_num_of_characters(soup),
+        'num_unique_words': get_num_of_unique_words(soup),
+        'num_unique_characters': get_num_of_unique_characters(soup),
+        'num_digits': get_num_of_digits(soup)
+    }
+    return html_features
 
 
-def get_html_features_df(html_files_dir):
-    # get html features and file names for all txt files in a given directory
-    html_files = glob.glob(html_files_dir + '/*.txt')
+def process_zip(zip_file_path):
     html_features_list = []
     i = 1
-    for html_file in html_files:
-        print(f"Processing file {i} of {len(html_files)}")
-        html_features = get_html_features(html_file)
-        html_features_list.append(html_features)
-        i += 1
+    with zipfile.ZipFile(zip_file_path, 'r') as f:
+        for html_file in f.namelist():
+            if html_file.endswith('.txt'):
+                raw_html = f.read(html_file)
+                print(
+                    f"Processing file {i} of {len(f.namelist())} in {zip_file_path}")
+                html_features = get_html_features(raw_html)
+                html_features['filename'] = html_file.split('/')[-1]
+                html_features_list.append(html_features)
+                i += 1
     df = pd.DataFrame(html_features_list)
-    df['detected_language'] = df['raw_text'].apply(
-        lambda x: detect(x) if x else None)
-    return df
+    df.to_csv('data/csv/' + zip_file_path.split('/')
+              [-1].split('.')[0] + '.csv', index=False)
+
+
+if __name__ == '__main__':
+    zip_files = glob.glob('data/raw/*.zip')
+    with Pool(4) as p:
+        p.map(process_zip, zip_files)
