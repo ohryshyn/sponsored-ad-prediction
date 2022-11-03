@@ -5,9 +5,6 @@ import glob
 import pandas as pd
 
 
-RAW_HTML_FOLDER_PATH = 'data/raw_html_files/'
-
-
 def get_title(soup):
     # get title of the html file if it exists, if not, return none
     title = soup.title
