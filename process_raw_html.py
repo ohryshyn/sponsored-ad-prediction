@@ -161,10 +161,81 @@ def get_num_of_digits(soup):
     return len([c for c in soup.text if c.isdigit()])
 
 
+def has_google_analytics(soup):
+    # check if has google analytics code
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'google-analytics.com' in script.text:
+            return True
+    return False
+
+
+def has_google_tag_manager(soup):
+    # check if has google tag manager code
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'googletagmanager.com' in script.text:
+            return True
+    return False
+
+
+def has_google_remarketing(soup):
+    # check if has google code for remarketing tag
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'googleadservices.com' in script.text:
+            return True
+    return False
+
+
+def has_google_syndication(soup):
+    # check if has google syndication code
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'googlesyndication.com' in script.text:
+            return True
+    return False
+
+
+def has_google_adsense(soup):
+    # check if has google adsense code
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'pagead2.googlesyndication.com' in script.text:
+            return True
+    return False
+
+
+def has_pubads(soup):
+    # check if has pubads tag
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'pubads.g.doubleclick.net' in script.text:
+            return True
+    return False
+
+
+def has_clicky(soup):
+    # check if has clicky code
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'static.getclicky.com' in script.text:
+            return True
+    return False
+
+
+def has_header_bidding(soup):
+    # check if has prebid.js for header bidding
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if 'prebid.js' in script.text or 'prebid.org' in script.text or 'ne':
+            return True
+    return False
+
+
 def get_html_features(html):
-    # apply all parsing functions above to a given html file and returns a dictionary of features
+    # apply functions to a given html file and return a dictionary of features
     soup = bs.BeautifulSoup(html, 'html.parser')
-    # create a dictionary of features
     html_features = {
         'filename': '',
         'title': get_title(soup),
@@ -191,7 +262,15 @@ def get_html_features(html):
         'num_characters': get_num_of_characters(soup),
         'num_unique_words': get_num_of_unique_words(soup),
         'num_unique_characters': get_num_of_unique_characters(soup),
-        'num_digits': get_num_of_digits(soup)
+        'num_digits': get_num_of_digits(soup),
+        'has_google_analytics': has_google_analytics(soup),
+        'has_google_tag_manager': has_google_tag_manager(soup),
+        'has_google_remarketing': has_google_remarketing(soup),
+        'has_google_syndication': has_google_syndication(soup),
+        'has_google_adsense': has_google_adsense(soup),
+        'has_pubads': has_pubads(soup),
+        'has_clicky': has_clicky(soup),
+        'has_header_bidding': has_header_bidding(soup)
     }
     return html_features
 
@@ -214,7 +293,11 @@ def process_zip(zip_file_path):
               [-1].split('.')[0] + '.csv', index=False)
 
 
-if __name__ == '__main__':
-    zip_files = glob.glob('data/raw/*.zip')
+def main(html_dir='data/raw/'):
+    zip_files = glob.glob(html_dir+'*.zip')
     with Pool(4) as p:
         p.map(process_zip, zip_files)
+
+
+if __name__ == '__main__':
+    main()
