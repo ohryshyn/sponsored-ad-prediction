@@ -228,7 +228,7 @@ def has_header_bidding(soup):
     # check if has prebid.js for header bidding
     scripts = soup.find_all('script')
     for script in scripts:
-        if 'prebid.js' in script.text or 'prebid.org' in script.text or 'ne':
+        if 'prebid.js' in script.text or 'prebid.org' in script.text:
             return True
     return False
 
