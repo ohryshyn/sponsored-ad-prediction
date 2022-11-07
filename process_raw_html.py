@@ -233,6 +233,20 @@ def has_header_bidding(soup):
     return False
 
 
+def has_universal_pixel(soup):
+    # check if img or iframe has universal pixel
+    def check_tag(tag_str):
+        tags = soup.find_all(tag_str)
+        for tag in tags:
+            tag_clean = str(tag).replace(" ", "")
+            if ('height="1"' in tag_clean and 'width="1"' in tag_clean) or \
+                    ('width:1px' in tag_clean and 'height:1px' in tag_clean):
+                return True
+        return False
+    has_pixel = check_tag('img') or check_tag('iframe')
+    return has_pixel
+
+
 def get_html_features(html):
     # apply functions to a given html file and return a dictionary of features
     soup = bs.BeautifulSoup(html, 'html.parser')
@@ -270,7 +284,8 @@ def get_html_features(html):
         'has_google_adsense': has_google_adsense(soup),
         'has_pubads': has_pubads(soup),
         'has_clicky': has_clicky(soup),
-        'has_header_bidding': has_header_bidding(soup)
+        'has_header_bidding': has_header_bidding(soup),
+        'has_universal_pixel': has_universal_pixel(soup)
     }
     return html_features
 
