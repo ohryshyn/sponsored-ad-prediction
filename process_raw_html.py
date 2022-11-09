@@ -254,7 +254,7 @@ def get_html_features(html):
         'filename': '',
         'title': get_title(soup),
         'language': get_language(soup),
-        'raw_text': get_raw_text(soup),
+ #      'raw_text': get_raw_text(soup),
         'num_headers': get_num_headers(soup),
         'num_paragraphs': get_num_paragraphs(soup),
         'num_tags': get_num_tags(soup),
