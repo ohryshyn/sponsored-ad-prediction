@@ -7,7 +7,7 @@ import pandas as pd
 from process_raw_html import get_html_features
 
 
-MODEL = pickle.load(open('rf_model.pkl', 'rb'))
+MODEL = pickle.load(open('webapp_rf.pkl', 'rb'))
 EXCLUDE_COLS = ['filename', 'language', 'raw_text', 'title']
 
 
@@ -43,7 +43,7 @@ def get_random_image_link(html):
 
 
 def main():
-    st.title('Truly native? 🤡')
+    st.title('Truly native? 👀')
     st.subheader('Check if a website was sponsored for a native ad or not')
     st.text('Enter the URL to see the prediction')
     url = st.text_input('URL')
@@ -71,12 +71,18 @@ def main():
                     st.write('No images found on the web page')
                 except:
                     pass
+        except UnicodeDecodeError:
+            st.error('Cannot decode this URL. Please try another link.')
         except ValueError as e:
             if len(e.args) > 0 and e.args[0] == "unknown url type: ''":
                 st.error(
                     'Cannot process an empty string. Please enter a valid URL.')
             else:
-                st.error('Please enter a valid URL.')
+                st.error('Something went wrong. Please try another link.')
+                st.error(e)
+        except:
+            st.error('Cannot process this URL. Please try another link.')
+            st.error(e)
 
 
 if __name__ == '__main__':
