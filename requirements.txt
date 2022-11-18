@@ -8,3 +8,4 @@ lightgbm==3.3.3
 catboost==1.1.1
 streamlit==1.14.0
 nltk==3.7
+s3fs==2022.11.0
