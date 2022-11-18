@@ -131,3 +131,4 @@ dmypy.json
 # project files
 data/
 *.pkl
+.streamlit/
