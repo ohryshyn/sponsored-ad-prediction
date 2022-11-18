@@ -1,4 +1,5 @@
 import streamlit as st
+import s3fs
 import random
 import bs4 as bs
 import urllib.request
@@ -6,8 +7,16 @@ import pickle
 import pandas as pd
 from process_raw_html import get_html_features
 
+fs = s3fs.S3FileSystem(anon=False)
 
-MODEL = pickle.load(open('webapp_rf.pkl', 'rb'))
+
+@st.experimental_memo(ttl=600)
+def read_file(filename):
+    with fs.open(filename, 'rb') as f:
+        return pickle.load(f)
+
+
+MODEL = read_file('nativead-model/webapp_rf.pkl')
 EXCLUDE_COLS = ['filename', 'language', 'raw_text', 'title']
 
 
