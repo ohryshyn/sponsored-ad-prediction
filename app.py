@@ -5,12 +5,13 @@ import bs4 as bs
 import urllib.request
 import pickle
 import pandas as pd
+import randfacts
 from process_raw_html import get_html_features
 
 fs = s3fs.S3FileSystem(anon=False)
 
 
-@st.experimental_memo(ttl=600)
+@st.experimental_singleton()
 def read_file(filename):
     with fs.open(filename, 'rb') as f:
         return pickle.load(f)
@@ -53,7 +54,8 @@ def get_random_image_link(html):
 
 def main():
     st.title('Truly native? 👀')
-    st.subheader('Check if a website was sponsored for a native ad or not')
+    st.subheader(
+        'Check if a website would be considered sponsored on StumbleUpon!')
     st.text('Enter the URL to see the prediction')
     url = st.text_input('URL')
     if st.button('Predict if native!'):
@@ -64,22 +66,22 @@ def main():
                 pred_features = get_prediction_features(features)
                 prediction = get_prediction_result(pred_features)
                 if prediction:
-                    st.write("This website was **sponsored** for a native ad.")
+                    msg = 'This website **would be sponsored** on **<span style="color:#f74425">StumbleUpon</span>**.'
+                    st.markdown(msg, unsafe_allow_html=True)
                 else:
-                    st.write(
-                        "This website was **not sponsored** for a native ad.")
+                    msg = 'This website **would not be sponsored** on **<span style="color:#f74425">StumbleUpon</span>**.'
+                    st.markdown(msg, unsafe_allow_html=True)
             with st.expander("See more"):
                 st.write(
                     f"This is the title of your web page <span style='color:purple; font-weight:bold'>{features['title']}</span>", unsafe_allow_html=True)
                 st.write(
                     f"The number of scripts on your web page is **{features['num_scripts']}**")
-                try:
-                    st.image(get_random_image_link(html))
-                    st.caption('Random image from the web page')
-                except AttributeError as e:
-                    st.write('No images found on the web page')
-                except:
-                    pass
+                st.markdown("""---""")
+                st.write("_Did you know?_")
+                st.write(f"{randfacts.get_fact()}")
+            st.write(
+                "GitHub repository for this project available **[at this link](https://github.com/oleh-ai/sponsored-ad-prediction/blob/main/app.py)**")
+
         except UnicodeDecodeError:
             st.error('Cannot decode this URL. Please try another link.')
         except ValueError as e:
