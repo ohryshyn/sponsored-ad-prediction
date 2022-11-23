@@ -57,6 +57,7 @@ def main():
     st.subheader(
         'Check if a website would be considered sponsored on StumbleUpon!')
     st.text('Enter the URL to see the prediction')
+    st.warning('Complex websites are likely to take longer to process.', icon="⚠️")
     url = st.text_input('URL')
     if st.button('Predict if native!'):
         try:
