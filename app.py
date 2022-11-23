@@ -91,7 +91,7 @@ def main():
             else:
                 st.error('Something went wrong. Please try another link.')
                 st.error(e)
-        except:
+        except Exception as e:
             st.error('Cannot process this URL. Please try another link.')
             st.error(e)
 
