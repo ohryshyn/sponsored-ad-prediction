@@ -53,13 +53,13 @@ def get_random_image_link(html):
 
 
 def main():
-    st.title('Truly native? 👀')
+    st.title('Sponsored ad? 👀')
     st.subheader(
         'Check if a website would be considered sponsored on StumbleUpon!')
     st.text('Enter the URL to see the prediction')
     st.warning('Complex websites are likely to take longer to process.', icon="⚠️")
     url = st.text_input('URL')
-    if st.button('Predict if native!'):
+    if st.button('Predict if sponsored!'):
         try:
             with st.spinner('Fitting the model...'):
                 html = get_html_from_url(url)
@@ -74,15 +74,16 @@ def main():
                     st.markdown(msg, unsafe_allow_html=True)
             with st.expander("See more"):
                 st.write(
-                    f"This is the title of your web page <span style='color:purple; font-weight:bold'>{features['title']}</span>", unsafe_allow_html=True)
+                    f"The title of your web page is <span style='color:purple; font-weight:bold'>{features['title']}</span>", unsafe_allow_html=True)
                 st.write(
                     f"The number of scripts on your web page is **{features['num_scripts']}**")
+                st.write(
+                    f"It also has **{features['num_links']} links (both visible and hidden)**")
                 st.markdown("""---""")
                 st.write("_Did you know?_")
                 st.write(f"{randfacts.get_fact()}")
             st.write(
                 "GitHub repository for this project available **[at this link](https://github.com/oleh-ai/sponsored-ad-prediction/blob/main/app.py)**")
-
         except UnicodeDecodeError:
             st.error('Cannot decode this URL. Please try another link.')
         except ValueError as e:
@@ -91,10 +92,8 @@ def main():
                     'Cannot process an empty string. Please enter a valid URL.')
             else:
                 st.error('Something went wrong. Please try another link.')
-                st.error(e)
         except Exception as e:
             st.error('Cannot process this URL. Please try another link.')
-            st.error(e)
 
 
 if __name__ == '__main__':
